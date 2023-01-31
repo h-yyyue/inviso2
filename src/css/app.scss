@@ -295,7 +295,17 @@ and (min-resolution:.001dpcm) {
 #guis .cone,
 #guis.editor .cone {
   color: black;
-  font-weight: bold; }
+  font-weight: bold; 
+  background-color: #cfd7e3;
+}
+
+#guis {
+  background-color: #e9e6f0;
+}
+
+#guis .baseParam {
+  border-top: 0.5px solid #aaa;
+}
 
 #guis .cone .valueSpan,
 #guis.editor .cone .valueSpan {
