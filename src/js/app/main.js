@@ -35,7 +35,7 @@ import * as firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/database";
 import "firebase/storage";
-
+import { getStorage, ref, deleteObject } from "firebase/storage";
 // Local vars for rStats
 let rS, bS, glS, tS;
 const TOLERANCE = 0.000001;
@@ -559,7 +559,22 @@ export default class Main {
     }
 
     this.dbRef.child('users').child(this.headKey.key).onDisconnect().remove();
-
+    this.dbRef.onDisconnect().set(
+      this.soundObjects.forEach((soundObject) => {
+        soundObject.removeFromScene(this.scene);
+      }),
+      this.soundZones.forEach((soundZone) => {
+        soundZone.removeFromScene(this.scene);
+      }),
+      this.soundObjects = [],
+      this.soundZones = [],
+      deleteObject(this.stoRef).then(() => {
+        // File deleted successfully
+      }).catch((error) => {
+        // Uh-oh, an error occurred!
+      }),
+      )
+          
     this.gui.updateFirebaseDetails(this.dbRef, this.stoRef, this.headKey.key, this.roomCode);
 
     function createHeadTrajectory(parent, fbChild){
@@ -700,9 +715,9 @@ export default class Main {
         let self = this;
         if(childC.val().lastEdit != this.headKey.key && childC.val().hasOwnProperty('sound')){
           let obj = this.soundObjects.find(object =>
-            object.containerObject.name == childC.val().parent
+            object.containerObject.name == child.key//childC.val().parent
           );
-        this.stoRef.child('soundObjects/'+ childC.val().parent +'/' + childC.val().uuid + '/' + childC.val().sound).getDownloadURL().then(function(url){
+        this.stoRef.child('soundObjects/'+ child.key +'/' + childC.val().uuid + '/' + childC.val().sound).getDownloadURL().then(function(url){
             let request = new XMLHttpRequest();
             request.responseType = 'blob';
             request.onload = function(event) {
