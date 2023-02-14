@@ -831,7 +831,6 @@ export default class SoundObject {
     scene.remove(this.altitudeHelper, true);
     scene.remove(this.axisHelper, true);
     scene.remove(this.trajectory, true);
-
     for (const i in this.cones) {
       this.cones[i].sound.source.stop();
     }

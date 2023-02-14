@@ -560,7 +560,8 @@ export default class Main {
 
     this.dbRef.child('users').child(this.headKey.key).onDisconnect().remove();
     this.dbRef.onDisconnect().set(
-      this.soundObjects.forEach((soundObject) => {
+      destroyFirebaseScene(),
+      /*this.soundObjects.forEach((soundObject) => {
         soundObject.removeFromScene(this.scene);
       }),
       this.soundZones.forEach((soundZone) => {
@@ -572,7 +573,7 @@ export default class Main {
         // File deleted successfully
       }).catch((error) => {
         // Uh-oh, an error occurred!
-      }),
+      }),*/
       )
           
     this.gui.updateFirebaseDetails(this.dbRef, this.stoRef, this.headKey.key, this.roomCode);
