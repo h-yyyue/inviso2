@@ -157,8 +157,9 @@ and (min-resolution:.001dpcm) {
   font-family: roboto, 'helvetica neue', helvetica, arial, sans-serif;
   line-height: 20px;
   box-shadow: 0 0 5px #aaa;
+  -webkit-transition: background-color 200ms ease, color 200ms ease, opacity 200ms ease; 
   transition: background-color 200ms ease, color 200ms ease, opacity 200ms ease;
-  -webkit-transition: background-color 200ms ease, color 200ms ease, opacity 200ms ease; }
+}
 
 #guis > div {
   padding: 15px;
@@ -290,13 +291,13 @@ and (min-resolution:.001dpcm) {
   font-weight: bold; }
 
 #guis .remove-file:hover {
-  color: pink; }
+  color: rgb(255, 194, 204); }
 
 #guis .cone,
 #guis.editor .cone {
   color: black;
   font-weight: bold; 
-  background-color: #cfd7e3;
+  //background-color: rgb(179, 181, 198);
 }
 
 #guis {
@@ -676,7 +677,7 @@ opacity: 0.8; }
     display: none;
 }
 
-#roomcode {
+#roomcode, #email-input {
   padding: 5px;
   width: 40%;
   text-align: center;

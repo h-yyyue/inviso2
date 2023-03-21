@@ -35,6 +35,8 @@ import * as firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/database";
 import "firebase/storage";
+//var firebase = require('firebase');
+//var firebaseui = require('firebaseui');
 import { getStorage, ref, deleteObject } from "firebase/storage";
 // Local vars for rStats
 let rS, bS, glS, tS;
@@ -228,6 +230,7 @@ export default class Main {
         if(self.roomCode === null) self.redo();
     }
     document.getElementById('collab').onclick = function(){
+        document.getElementById('email-input').value = "";
         document.getElementById('roomcode').value = "";
         if(self.roomCode != null){
             document.getElementById('invite-code').innerHTML = self.roomCode;
@@ -243,9 +246,26 @@ export default class Main {
         redo.classList.remove('active');
         undo.style.cursor = 'not-allowed';
         redo.style.cursor = 'not-allowed';
-
+        
+        document.getElementById('login-box').style.display = 'block'; 
         document.getElementById('room-input').style.display = 'block';
-        document.getElementById('splashscreen').style.display = 'block';
+        document.getElementById('splashscreen').style.display = 'block';    
+    }
+
+    document.getElementById('submit-login').onclick= function(){
+      let inputEmail = document.getElementById('emailadd').value;
+      console.log(inputEmail);
+     // let inputPassword = document.getElementById('password').value;
+     /* firebase.auth().signInWithEmailAndPassword(inputEmail, inputPassword)
+      .then((userCredential) => {
+        // Signed in
+        var user = userCredential.user;
+        // ...
+      })
+      .catch((error) => {
+        var errorCode = error.code;
+        var errorMessage = error.message;
+      });*/
     }
     document.getElementById('copy-code').onclick = function(){
         if(self.roomCode && navigator.clipboard){
@@ -559,7 +579,7 @@ export default class Main {
     }
 
     this.dbRef.child('users').child(this.headKey.key).onDisconnect().remove();
-    this.dbRef.onDisconnect().set(
+    /*this.dbRef.onDisconnect().set(
       destroyFirebaseScene(),
       /*this.soundObjects.forEach((soundObject) => {
         soundObject.removeFromScene(this.scene);
@@ -573,8 +593,8 @@ export default class Main {
         // File deleted successfully
       }).catch((error) => {
         // Uh-oh, an error occurred!
-      }),*/
-      )
+      }),
+      )*/
           
     this.gui.updateFirebaseDetails(this.dbRef, this.stoRef, this.headKey.key, this.roomCode);
 
@@ -1190,6 +1210,37 @@ export default class Main {
   }
 
   generateInviteCode(){
+    // Initialize the FirebaseUI Widget using Firebase.
+    /*let ui = new firebaseui.auth.AuthUI(firebase.auth());
+    let uiConfig = {
+    callbacks: {
+      signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+        // User successfully signed in.
+        // Return type determines whether we continue the redirect automatically
+        // or whether we leave that to developer to handle.
+        return false;
+      },
+      /*uiShown: function() {
+        // The widget is rendered.
+        // Hide the loader.
+        //document.getElementById('loader').style.display = 'none';
+      }
+    },
+    // Will use popup for IDP Providers sign-in flow instead of the default, redirect.
+    signInFlow: 'popup',
+    signInSuccessUrl: '<url-to-redirect-to-on-success>',
+    signInOptions: [
+      // Leave the lines as is for the providers you want to offer your users.
+      firebase.auth.EmailAuthProvider.PROVIDER_ID,
+    ],
+    // Terms of service url.
+    tosUrl: 'https://www.google.com',
+    // Privacy policy url.
+    //privacyPolicyUrl: '<your-privacy-policy-url>'
+    };
+
+    ui.start('#firebaseui-auth-container', uiConfig);
+*/
     if(this.inviteCode === null) {
         this.inviteCode =  Math.random().toString(36).substr(2, 7).toUpperCase();
         if(this.audio.context.state === "suspended"){
@@ -1204,7 +1255,7 @@ export default class Main {
             document.getElementById('invite-code').innerHTML = self.inviteCode;
             self.roomCode = self.inviteCode;
             self.dbRef = self.database.ref(self.roomCode);
-            self.stoRef = self.storage.ref().child(self.roomCode);
+            this.stoRef = self.storage.ref().child(self.roomCode);
             this.dbRef.child('globals').child('sound').set({
                 globalIsPlaying: this.isPlaying,
             });

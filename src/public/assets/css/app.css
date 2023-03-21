@@ -212,8 +212,8 @@ body {
   font-family: roboto, 'helvetica neue', helvetica, arial, sans-serif;
   line-height: 20px;
   box-shadow: 0 0 5px #aaa;
-  transition: background-color 200ms ease, color 200ms ease, opacity 200ms ease;
-  -webkit-transition: background-color 200ms ease, color 200ms ease, opacity 200ms ease; }
+  -webkit-transition: background-color 200ms ease, color 200ms ease, opacity 200ms ease;
+  transition: background-color 200ms ease, color 200ms ease, opacity 200ms ease; }
 
 #guis > div {
   padding: 15px;
@@ -329,12 +329,18 @@ body {
   font-weight: bold; }
 
 #guis .remove-file:hover {
-  color: pink; }
+  color: #ffc2cc; }
 
 #guis .cone,
 #guis.editor .cone {
   color: black;
   font-weight: bold; }
+
+#guis {
+  background-color: #e9e6f0; }
+
+#guis .baseParam {
+  border-top: 0.5px solid #aaa; }
 
 #guis .cone .valueSpan,
 #guis.editor .cone .valueSpan {
@@ -665,7 +671,7 @@ input[type='file'] {
   margin-left: 1%;
   display: none; }
 
-#roomcode {
+#roomcode, #email-input {
   padding: 5px;
   width: 40%;
   text-align: center;

@@ -331,7 +331,7 @@ export default class GUIWindow {
 }
 
   // "add trajectory" dialog
-  addTrajectoryDialog() {
+addTrajectoryDialog() {
 	var addTrajectoryElem = this.addParameter({
 	  value: 'ADD TRAJECTORY',
 	  button: true,
@@ -342,270 +342,271 @@ export default class GUIWindow {
 	});
 	addTrajectoryElem.id = 'add-trajectory'
 	return addTrajectoryElem;
-  }
+}
 
   // set up initial parameters for a sound object cone
-  addCone(cone, isVisible = true) {
-	// move add cone button over cone window
-	let addButton = document.getElementById('add-cone');
-	if (addButton){
-		addButton.style.zIndex = "20";
-		addButton.style.position = "absolute";
-		// addButton.style.left = "26.5%";
-        
-	}
-
-	// called every single time the object is clicked
-	var elem = this.addElem('', false, document.getElementById('add-cone'));
-	elem.id = 'cone-' + cone.id;
-	elem.className = 'cone';
-    if (!isVisible) {
-        elem.style.display = 'none';
-    }
-
-	// set bg color
-    // let hoverColor = cone.hoverColor();
-    // console.log("get HSL: ", hoverColor.getHSL());
-	let color = cone.hoverColor();
-    color.getHSL(cone.hoverColor());
-
-	color.h *= 360;
-	color.s *= 100;
-	color.l = Math.max(color.l*100, 70);
-	elem.style.backgroundColor = 'hsl('+color.h+','+color.s+'%,'+color.l+'%)';
-
-	
-	var object = this.obj;
-	let headKey = this.headKey;
-	let roomCode = this.roomCode;
-
-	function changeAudioTime(dx) {
-	  if (cone.sound && cone.sound.state) {
-		if (!cone.sound.state.isAudioPaused) {
-		  object.stopConeSound(cone);
+addCone(cone, isVisible = true) {
+		// move add cone button over cone window
+		let addButton = document.getElementById('add-cone');
+		if (addButton){
+			addButton.style.zIndex = "20";
+			addButton.style.position = "absolute";
+			// addButton.style.left = "26.5%";
+					
 		}
-		cone.sound.state.isChangingAudioTime = true;
 
-		// Value sound be between 0 and duration of audio
-		const max = cone.sound.state.duration;
-		const time = Math.max(Math.min(Math.floor(cone.sound.state.currentTime + dx), max), 0)
+		// called every single time the object is clicked
+		var elem = this.addElem('', false, document.getElementById('add-cone'));
+		elem.id = 'cone-' + cone.id;
+		elem.className = 'cone';
+			if (!isVisible) {
+					elem.style.display = 'none';
+			}
 
-		// Set current time and update paused at time
-		cone.sound.state.currentTime = time;
-		cone.sound.state.pausedAt = time * 1000;
+		// set bg color
+			//let hoverColor = cone.hoverColor();
+			
+		let color = cone.hoverColor();//();
+			//color.getHSL(cone.hoverColor());
+			console.log("get HSL: ", cone.hoverColor());
 
-		// Play/pause depending on global play/pause status
-		if (cone.userSetPlay) {
-		  object.playConeSound(cone);
+		var cr = Math.min(color.r*270, 255);
+		var cg = Math.min(color.g*270, 255);
+		var cb = Math.min(color.b*270, 255);//Math.max(color.l*100, 70);
+		elem.style.backgroundColor = 'rgb('+cr+', '+cg+', '+cb+')';//'hsl('+color.h+','+color.s+'%,'+color.l+'%)';
+
+		
+		var object = this.obj;
+		let headKey = this.headKey;
+		let roomCode = this.roomCode;
+
+		function changeAudioTime(dx) {
+			if (cone.sound && cone.sound.state) {
+			if (!cone.sound.state.isAudioPaused) {
+				object.stopConeSound(cone);
+			}
+			cone.sound.state.isChangingAudioTime = true;
+
+			// Value sound be between 0 and duration of audio
+			const max = cone.sound.state.duration;
+			const time = Math.max(Math.min(Math.floor(cone.sound.state.currentTime + dx), max), 0)
+
+			// Set current time and update paused at time
+			cone.sound.state.currentTime = time;
+			cone.sound.state.pausedAt = time * 1000;
+
+			// Play/pause depending on global play/pause status
+			if (cone.userSetPlay) {
+				object.playConeSound(cone);
+			}
+			}
 		}
-	  }
-	}
 
-	function audioPlayPause() {
-	  if (cone.sound && cone.sound.state) {
-		if (cone.sound.state.isAudioPaused) {
-		  object.playConeSound(cone, true);
-		  cone.userSetPlay = true;
+		function audioPlayPause() {
+			if (cone.sound && cone.sound.state) {
+			if (cone.sound.state.isAudioPaused) {
+				object.playConeSound(cone, true);
+				cone.userSetPlay = true;
+			}
+			else {
+				object.stopConeSound(cone, true);
+				cone.userSetPlay = false;
+			}
+			}
 		}
-		else {
-		  object.stopConeSound(cone, true);
-		  cone.userSetPlay = false;
+
+		function changeVolume(dx) {
+			if (cone.sound && cone.sound.volume) {
+
+			// clamp value to (0.05, 2)
+			const volume = Math.max(Math.min(cone.sound.volume.gain.value + dx/50, 2), 0.05);
+
+			if (volume !== cone.sound.volume.gain.value) {
+				// modify cone length
+				cone.sound.volume.gain.value = volume;
+				object.changeLength(cone);
+				if(roomCode != null){
+				if(object.finishUploadingSound){
+					let updates = {
+						volume: volume,
+						lastEdit: headKey
+					}
+					object.dbRef.child('objects').child(object.containerObject.name).child('cones').child(cone.uuid).update(updates);
+				}
+				}
+			}
+			}
 		}
-	  }
-	}
 
-	function changeVolume(dx) {
-	  if (cone.sound && cone.sound.volume) {
+		function changeSpread(dx) {
+			if (cone.sound && cone.sound.spread) {
+			// clamp value to (0.05,1)
+			const spread = Math.max(Math.min(cone.sound.spread + dx/100, 1), 0.05);
 
-		// clamp value to (0.05, 2)
-		const volume = Math.max(Math.min(cone.sound.volume.gain.value + dx/50, 2), 0.05);
+			if (spread !== cone.sound.spread) {
+				// modify cone width
+				cone.sound.spread = spread;
+				object.changeWidth(cone);
+			}
+			if(roomCode != null){
+				if(object.finishUploadingSound){
+					let updates = {
+						spread: spread,
+						lastEdit: headKey
+					}
+					object.dbRef.child('objects').child(object.containerObject.name).child('cones').child(cone.uuid).update(updates);
+				}
+			}
+			}
+		}
 
-		if (volume !== cone.sound.volume.gain.value) {
-		  // modify cone length
-		  cone.sound.volume.gain.value = volume;
-		  object.changeLength(cone);
-		  if(roomCode != null){
+		function setConeRotation(component, dx) {
+			// clamp lat/long values
+			var lat = cone.lat || 0.0001;
+			var long = cone.long || 0.0001;
+
+			if (component === "lat") {
+			if (long > 0) {
+				lat -= dx * Math.PI / 180;
+			}
+			else {
+				lat += dx * Math.PI / 180;
+			}
+			if (lat > Math.PI) {
+				lat = Math.PI - lat;
+				long = -long;
+			}
+			else if (lat < -Math.PI) {
+				lat = Math.PI - lat;
+				long = -long;
+			}
+			}
+			else {
+			long += dx * Math.PI / 180;
+			if (long > Math.PI *2) {
+				long -= Math.PI * 2;
+			}
+			else if (long < -Math.PI * 2) {
+				long += Math.PI * 2;
+			}
+			}
+
+			object.pointConeMagic(cone, lat, long);
+			if(roomCode != null){
 			if(object.finishUploadingSound){
 				let updates = {
-					volume: volume,
+					latitude: lat,
+					longitude: long,
 					lastEdit: headKey
 				}
 				object.dbRef.child('objects').child(object.containerObject.name).child('cones').child(cone.uuid).update(updates);
 			}
-		  }
+			}
 		}
-	  }
-	}
 
-	function changeSpread(dx) {
-	  if (cone.sound && cone.sound.spread) {
-		// clamp value to (0.05,1)
-		const spread = Math.max(Math.min(cone.sound.spread + dx/100, 1), 0.05);
-
-		if (spread !== cone.sound.spread) {
-		  // modify cone width
-		  cone.sound.spread = spread;
-		  object.changeWidth(cone);
-		}
-		if(roomCode != null){
-			if(object.finishUploadingSound){
-				let updates = {
-					spread: spread,
+		let deleteCone = this.addParameter({
+			value: 'Delete',
+			button: true,
+			events:[{
+				type:'click',
+				callback: function() {
+				if(this.roomCode != null){
+					object.dbRef.child('objects').child(object.containerObject.name).child('cones').child(cone.uuid).update({
+					sound: null,
 					lastEdit: headKey
+					});
 				}
-				object.dbRef.child('objects').child(object.containerObject.name).child('cones').child(cone.uuid).update(updates);
+				this.app.undoableActionStack.push(new Action(this.app.activeObject, 'removeCone'));
+				this.app.undoableActionStack[this.app.undoableActionStack.length - 1].secondary = this.app.interactiveCone;
+				this.app.removeCone(this.obj, cone);
+				if (this.app.interactiveCone == null){
+					let addButton = document.getElementById("add-cone");
+					addButton.style.position = 'relative';
+					addButton.style.removeProperty('top');
+					addButton.firstChild.style.removeProperty('padding');
+									addButton.classList.remove('add-cone-object-view')
+				}
+				}.bind(this)
+			}]
+			}, elem);
+		deleteCone.id = 'delete-cone';
+
+		this.addParameter({
+			property: 'File',
+			value: cone.filename,
+			innercls: 'cone',
+			events: [{
+			type: 'click',
+			callback: this.addSound.bind(this)
+			}],
+		}, elem);
+		this.addParameter({
+			property: 'Time',
+			value: this.convertTime(cone.sound.state.currentTime),
+			type: 'time',
+			cls: 'time',
+			bind: changeAudioTime,
+			bindAdditional: audioPlayPause
+		}, elem);
+		this.addParameter({
+			property: 'Volume',
+			value: Number((cone.sound.volume.gain.value).toFixed(3)),
+			type: 'number',
+			cls: 'volume',
+			// suffix: ' dB',
+			bind: changeVolume
+		}, elem);
+		this.addParameter({
+			property: 'Spread',
+			value: Number((cone.sound.spread).toFixed(3)),
+			type: 'number',
+			cls: 'spread',
+			bind: changeSpread
+		}, elem);
+		this.addParameter({
+			property: 'Longitude',
+			value: Math.round(cone.long * 180/Math.PI),
+			type: 'number',
+			cls: 'long',
+			suffix: '˚',
+			bind: setConeRotation.bind(this, "long")
+		}, elem);
+		this.addParameter({
+			property: 'Latitude',
+			value: Math.round(cone.lat * 180/Math.PI),
+			type: 'number',
+			cls: 'lat',
+			suffix: '˚',
+			bind: setConeRotation.bind(this, "lat")
+		}, elem);
+
+		/* Cone navigation */
+		this.addNav({type: "cone", direction: "left"}, elem);
+		this.addNav({type: "cone", direction: "right"}, elem);
+		//let baseParams = document.getElementsByClassName('baseParam');
+		let baseParams = elem;
+		let guiHeight = document.getElementById('guis');
+		// baseParams.length > 0
+		if(guiHeight){
+			guiHeight = guiHeight.scrollHeight + 5;
+			baseParams = guiHeight - (elem.scrollHeight + 5) - 25;
+			//baseParams = baseParams[0].scrollHeight;
+
+			if(addButton && !addButton.classList.contains('add-cone-object-view')) {
+							addButton.classList.add('add-cone-object-view');
+							addButton.firstChild.style.padding = '1.5% 8px';
 			}
 		}
-	  }
-	}
-
-	function setConeRotation(component, dx) {
-	  // clamp lat/long values
-	  var lat = cone.lat || 0.0001;
-	  var long = cone.long || 0.0001;
-
-	  if (component === "lat") {
-		if (long > 0) {
-		  lat -= dx * Math.PI / 180;
-		}
-		else {
-		  lat += dx * Math.PI / 180;
-		}
-		if (lat > Math.PI) {
-		  lat = Math.PI - lat;
-		  long = -long;
-		}
-		else if (lat < -Math.PI) {
-		  lat = Math.PI - lat;
-		  long = -long;
-		}
-	  }
-	  else {
-		long += dx * Math.PI / 180;
-		if (long > Math.PI *2) {
-		  long -= Math.PI * 2;
-		}
-		else if (long < -Math.PI * 2) {
-		  long += Math.PI * 2;
-		}
-	  }
-
-	  object.pointConeMagic(cone, lat, long);
-	  if(roomCode != null){
-		if(object.finishUploadingSound){
-			let updates = {
-				latitude: lat,
-				longitude: long,
-				lastEdit: headKey
-			}
-			object.dbRef.child('objects').child(object.containerObject.name).child('cones').child(cone.uuid).update(updates);
-		}
-	  }
-	}
-
-	let deleteCone = this.addParameter({
-		value: 'Delete',
-		button: true,
-		events:[{
-		  type:'click',
-		  callback: function() {
-			if(this.roomCode != null){
-			  object.dbRef.child('objects').child(object.containerObject.name).child('cones').child(cone.uuid).update({
-				sound: null,
-				lastEdit: headKey
-			  });
-			}
-			this.app.undoableActionStack.push(new Action(this.app.activeObject, 'removeCone'));
-			this.app.undoableActionStack[this.app.undoableActionStack.length - 1].secondary = this.app.interactiveCone;
-			this.app.removeCone(this.obj, cone);
-			if (this.app.interactiveCone == null){
-				let addButton = document.getElementById("add-cone");
-				addButton.style.position = 'relative';
-				addButton.style.removeProperty('top');
-				addButton.firstChild.style.removeProperty('padding');
-                addButton.classList.remove('add-cone-object-view')
-			}
-		  }.bind(this)
-		}]
-	  }, elem);
-	deleteCone.id = 'delete-cone';
-
-	this.addParameter({
-	  property: 'File',
-	  value: cone.filename,
-	  innercls: 'cone',
-	  events: [{
-		type: 'click',
-		callback: this.addSound.bind(this)
-	  }],
-	}, elem);
-	this.addParameter({
-		property: 'Time',
-		value: this.convertTime(cone.sound.state.currentTime),
-		type: 'time',
-		cls: 'time',
-		bind: changeAudioTime,
-		bindAdditional: audioPlayPause
-	}, elem);
-	this.addParameter({
-	  property: 'Volume',
-	  value: Number((cone.sound.volume.gain.value).toFixed(3)),
-	  type: 'number',
-	  cls: 'volume',
-	  // suffix: ' dB',
-	  bind: changeVolume
-	}, elem);
-	this.addParameter({
-	  property: 'Spread',
-	  value: Number((cone.sound.spread).toFixed(3)),
-	  type: 'number',
-	  cls: 'spread',
-	  bind: changeSpread
-	}, elem);
-	this.addParameter({
-	  property: 'Longitude',
-	  value: Math.round(cone.long * 180/Math.PI),
-	  type: 'number',
-	  cls: 'long',
-	  suffix: '˚',
-	  bind: setConeRotation.bind(this, "long")
-	}, elem);
-	this.addParameter({
-	  property: 'Latitude',
-	  value: Math.round(cone.lat * 180/Math.PI),
-	  type: 'number',
-	  cls: 'lat',
-	  suffix: '˚',
-	  bind: setConeRotation.bind(this, "lat")
-	}, elem);
-
-	/* Cone navigation */
-	this.addNav({type: "cone", direction: "left"}, elem);
-	this.addNav({type: "cone", direction: "right"}, elem);
-	//let baseParams = document.getElementsByClassName('baseParam');
-	let baseParams = elem;
-	let guiHeight = document.getElementById('guis');
-	// baseParams.length > 0
-	if(guiHeight){
-		guiHeight = guiHeight.scrollHeight + 5;
-		baseParams = guiHeight - (elem.scrollHeight + 5) - 25;
-		//baseParams = baseParams[0].scrollHeight;
-
-		if(addButton && !addButton.classList.contains('add-cone-object-view')) {
-            addButton.classList.add('add-cone-object-view');
-            addButton.firstChild.style.padding = '1.5% 8px';
-		}
-	}
-	// let button = document.querySelectorAll("#delete-cone > span");
-	let deleteCones = document.querySelectorAll("#delete-cone");
-	let button = deleteCones[deleteCones.length - 1].firstChild;
-	button.style.fontWeight = "normal";
-	button.style.backgroundColor = "#f0f0f0"
-	button.style.color = "#5d5e5d";
-	button.style.borderRadius = "6px";
-	deleteCones[deleteCones.length - 1].style.padding = "0%";
-	return elem;
-  }
+		// let button = document.querySelectorAll("#delete-cone > span");
+		let deleteCones = document.querySelectorAll("#delete-cone");
+		let button = deleteCones[deleteCones.length - 1].firstChild;
+		button.style.fontWeight = "normal";
+		button.style.backgroundColor = "#f0f0f0"
+		button.style.color = "#5d5e5d";
+		button.style.borderRadius = "6px";
+		deleteCones[deleteCones.length - 1].style.padding = "0%";
+		return elem;
+}
 
   // remove cone parameter window
   removeCone(cone) {

@@ -9,6 +9,7 @@
   <section id="appContainer" class="main">
     <div id="loading">Loading...</div>
     <div id="splashscreen">
+    
         <button id="exit-code"> x </button>
       <p class="splash-body splash-invite">To invite other users to this Inviso scene, share the following code with them:</p>
       <form style="display: flex; justify-content: center; align-items: center">
@@ -18,6 +19,13 @@
         </div>
       </form>
       <hr width="90%" noshade class="splash-body">
+        <div id="login-box" style="display: block;">
+        <form>
+          <input id="email-input" type="text" name="email" size="10" maxlength="6"/>
+          <!--<input id="password-input" type="text" name="password" size="10" maxlength="6"/>--> 
+          <button type="button" id="submit-login" style="background: #f0f0f0">log in</button>
+        </form>
+      </div>
       <p class="splash-body splash-join">To join another user's scene, enter the code they shared with you: </p>
       <div id="room-input" style="display: block">
         <form>
@@ -101,5 +109,9 @@
   <script src="./assets/js/simplify3D.js"></script>
   <script src="./assets/js/libtess.min.js"></script>
   <script src="./assets/js/app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.13.1/firebase.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
+  <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
 </body>
 </html>
