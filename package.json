@@ -23,7 +23,7 @@
     "@types/three": "^0.149.0",
     "es6-promise": "^4.2.8",
     "firebase": "^7.24.0",
-    "firebaseui": "^6.0.2",
+    "firebaseui": "file:../../../firebaseui-web",
     "regenerator-runtime": "^0.13.9",
     "sass-loader": "^6.0.7",
     "three": "^0.150.1",

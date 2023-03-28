@@ -35,9 +35,7 @@ import * as firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/database";
 import "firebase/storage";
-//var firebase = require('firebase');
-//var firebaseui = require('firebaseui');
-import { getStorage, ref, deleteObject } from "firebase/storage";
+import * as firebaseui from "firebaseui";
 // Local vars for rStats
 let rS, bS, glS, tS;
 const TOLERANCE = 0.000001;
@@ -48,6 +46,8 @@ export default class Main {
   constructor(container) {
     firebase.initializeApp(Config.firebaseConfig);
     // this.functions = firebase.functions();
+    // Initialize the FirebaseUI Widget using Firebase.
+    var ui = new firebaseui.auth.AuthUI(firebase.auth());
     this.database = firebase.database();
     this.storage = firebase.storage();
     this.dbRef = this.database.ref();
@@ -211,6 +211,52 @@ export default class Main {
     this.scene.add(this.axisHelper);
 
     // ui elements
+    var user = null;
+    var permit = false;
+    var uiConfig = {
+      //autoUpgradeAnonymousUsers: true,
+      callbacks: {
+        signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+          user = authResult.user;
+          if (user.email=="hyhy@umich.edu") {
+            console.log(user.uid);
+            permit = true;
+          }
+          
+          // User successfully signed in.
+          // Return type determines whether we continue the redirect automatically
+          // or whether we leave that to developer to handle.
+          return false;
+        },/*
+        /*signInFailure: function(error) {
+          // Some unrecoverable error occurred during sign-in.
+          // Return a promise when error handling is completed and FirebaseUI
+          // will reset, clearing any UI. This commonly occurs for error code
+          // 'firebaseui/anonymous-upgrade-merge-conflict' when merge conflict
+          // occurs. Check below for more details on this.
+          return handleUIError(error);
+        },
+        uiShown: function() {
+          // The widget is rendered.
+          // Hide the loader.
+          document.getElementById('loading').style.display = 'none';
+        }*/
+      },
+      // Will use popup for IDP Providers sign-in flow instead of the default, redirect.
+      signInFlow: 'popup',
+      //signInSuccessUrl: '<url-to-redirect-to-on-success>',
+      signInOptions: [
+        {
+          provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+          requireDisplayName: false
+        }
+      ],
+      // Terms of service url.
+      tosUrl: 'https://www.google.com',
+      // Privacy policy url.
+      privacyPolicyUrl: 'https://www.google.com'
+    };
+
     if(navigator.clipboard && window.isSecureContext){
         document.getElementById('container').style.display = 'inline-block';
     }
@@ -230,7 +276,10 @@ export default class Main {
         if(self.roomCode === null) self.redo();
     }
     document.getElementById('collab').onclick = function(){
-        document.getElementById('email-input').value = "";
+      if (!user) {
+        ui.start('#firebaseui-auth-container', uiConfig);
+      }
+      if (permit){
         document.getElementById('roomcode').value = "";
         if(self.roomCode != null){
             document.getElementById('invite-code').innerHTML = self.roomCode;
@@ -247,26 +296,12 @@ export default class Main {
         undo.style.cursor = 'not-allowed';
         redo.style.cursor = 'not-allowed';
         
-        document.getElementById('login-box').style.display = 'block'; 
         document.getElementById('room-input').style.display = 'block';
-        document.getElementById('splashscreen').style.display = 'block';    
+        document.getElementById('splashscreen').style.display = 'block'; 
+      }
+          
     }
 
-    document.getElementById('submit-login').onclick= function(){
-      let inputEmail = document.getElementById('emailadd').value;
-      console.log(inputEmail);
-     // let inputPassword = document.getElementById('password').value;
-     /* firebase.auth().signInWithEmailAndPassword(inputEmail, inputPassword)
-      .then((userCredential) => {
-        // Signed in
-        var user = userCredential.user;
-        // ...
-      })
-      .catch((error) => {
-        var errorCode = error.code;
-        var errorMessage = error.message;
-      });*/
-    }
     document.getElementById('copy-code').onclick = function(){
         if(self.roomCode && navigator.clipboard){
             this.innerHTML = 'Copied!';
@@ -579,9 +614,9 @@ export default class Main {
     }
 
     this.dbRef.child('users').child(this.headKey.key).onDisconnect().remove();
-    /*this.dbRef.onDisconnect().set(
+   /* this.dbRef.onDisconnect().set(
       destroyFirebaseScene(),
-      /*this.soundObjects.forEach((soundObject) => {
+      this.soundObjects.forEach((soundObject) => {
         soundObject.removeFromScene(this.scene);
       }),
       this.soundZones.forEach((soundZone) => {
